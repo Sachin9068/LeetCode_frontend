@@ -1,47 +1,95 @@
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
+const signupSchema = z.object({
+  firstName: z.string().min(3, "Minimum character should be 3"),
+  emailId: z.string().email("Invalid Email"),
+  password: z.string().min(8, "Password is to weak")
+});
 
-function Signup(){
+function Signup() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ resolver: zodResolver(signupSchema) });
 
-    const {register,handleSubmit,formState: { errors },} = useForm();
+  const onSubmit = (data) => {
+    console.log(data);
 
-     return (
-    <form onSubmit={handleSubmit((data) => console.log(data))}>
+    // Backend data ko send kar dena chaiye?
+  };
 
-      <input {...register('firstName')} placeholder='Enter First Name' />
-      <input {...register('email')} placeholder='Enter Email Id'/>
-      <input {...register('password',)} placeholder='Enter your Password' />
+  return (
     
-      <button type="submit">submit</button>
-    </form>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--color-info-content)] "> {/* Centering container */}
+      <div className="card w-96 bg-base-100 shadow-xl"> {/* Existing card styling */}
+        <div className="card-body bg-[var(--color-info-content)] rounded-2xl text-gray-300">
+          <h2 className="card-title justify-center text-3xl">Leetcode</h2> {/* Centered title */}
+          <form onSubmit={handleSubmit(onSubmit)}>
+            {/* Existing form fields */}
+            <div className="form-control">
+              <label className="label mb-1">
+                <span className="label-text">First Name</span>
+              </label>
+              <input
+                type="text"
+                placeholder="John"
+                className={`input input-bordered  text-gray-900 ${errors.firstName && 'input-error'}`}
+                {...register('firstName')}
+              />
+              {errors.firstName && (
+                <span className="text-error">{errors.firstName.message}</span>
+              )}
+            </div>
+
+            <div className="form-control  mt-4">
+              <label className="label mb-1">
+                <span className="label-text">Email</span>
+              </label>
+              <input
+                type="email"
+                placeholder="john@example.com"
+                className={`input input-bordered  text-gray-900 ${errors.emailId && 'input-error'}`}
+                {...register('emailId')}
+              />
+              {errors.emailId && (
+                <span className="text-error">{errors.emailId.message}</span>
+              )}
+            </div>
+
+            <div className="form-control mt-4">
+              <label className="label mb-1">
+                <span className="label-text">Password</span>
+              </label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                className={`input input-bordered  text-gray-900 ${errors.password && 'input-error'}`}
+                {...register('password')}
+              />
+              {errors.password && (
+                <span className="text-error">{errors.password.message}</span>
+              )}
+            </div>
+
+            <div className="form-control mt-6 flex justify-center">
+              <button
+                type="submit"
+                className="btn btn-primary"
+              >
+                Sign Up
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }
 
+export default Signup;
 
 
 
-export default Signup
-
-
-// function Signup(){
-
-//     const [name,setName] = useState('');
-//     const [email,setEmail] = useState('');
-//     const [password,setPassword] = useState('');
-
-//     const handlSubmit = (e)=>{
-//           e.preventDefault();
-
-//          console.log(name,email,password);
-//     }
-
-//     return (
-//         <form onSubmit={handlSubmit} className="flex flex-col jus">
-//             <input type="text" value={name} placeholder="Name" onChange={(e)=>setName(e.target.value)}></input>
-//             <input type="text" value={email} placeholder="Email" onChange={(e)=>setEmail(e.target.value)}></input>
-//             <input type="password" value={password} placeholder="password" onChange={(e)=>setPassword(e.target.value)}></input>
-
-//             <button type="submit">Submit</button>
-//         </form>
-//     )
-// }
