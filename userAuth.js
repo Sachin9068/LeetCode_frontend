@@ -27,6 +27,18 @@ export const loginUser = createAsyncThunk(
             return rejectWithValue(err);
         }
        
+});
+
+export const logoutUser = createAsyncThunk(
+    'auth/logout',
+    async (_, {rejectWithValue})=>{
+        try{
+            await axiosClient.get('/user/logout')
+             return null;
+        }
+        catch(err){
+            return rejectWithValue(err);
+        }
     }
 )
 
@@ -75,5 +87,24 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             state.user = null;
         })
+
+        //logout User Case
+
+        .addCase(logoutUser.pending , (state)=>{
+            state.loading = true;
+            state.error = null
+        })
+        .addCase(logoutUser.fulfilled ,(state,action)=>{
+            state.loading = false;
+            state.user = null;
+            state.isAuthenticated = false;
+            state.error = null;
+        })
+        .addCase(logoutUser.rejected ,(state,action)=>{
+            state.loading = false;
+            state.error = action.payload?.message;
+            state.isAuthenticated = false;
+            state.user = null
+        })
     }
-})
+});
