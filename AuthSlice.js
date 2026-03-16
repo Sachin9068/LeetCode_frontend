@@ -39,6 +39,18 @@ export const logoutUser = createAsyncThunk(
         catch(err){
             return rejectWithValue(err);
         }
+});
+
+export const checkAuth = createAsyncThunk(
+    'auth/check',
+    async (_,{rejectWithValue})=>{
+        try{
+              const {data} = await axiosClient.get('/user/check');
+              return data.user
+        }
+        catch(err){
+            return rejectWithValue(err);
+        }
     }
 )
 
@@ -106,5 +118,27 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             state.user = null
         })
+
+        //check User Case 
+        
+        .addCase(checkAuth.pending ,(state)=>{
+            state.loading = true;
+            state.error = null;
+        })
+        .addCase(checkAuth.fulfilled,(state,action)=>{
+            state.loading = false;
+            state.isAuthenticated = !!action.payload;
+            state.user = action.payload;
+        })
+        .addCase(checkAuth.rejected ,(state,action)=>{
+            state.loading = false;
+            state.error = action.payload?.message || "something went wrong";
+            state.isAuthenticated = false;
+            state.user = null;
+            s
+        })
+        
     }
 });
+
+export default authSlice.reducer;
