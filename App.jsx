@@ -20,8 +20,8 @@ function App(){
     <>
    <BrowserRouter>
        <Routes>
-          <Route path="/" element={isAuthenticated ?<Home/>:<Navigate to="/signup"/>}/>
-          <Route path="/login" element={<Login/>}/>
+          <Route path="/" element={isAuthenticated ?<Home/> :<Navigate to="/signup"/>}/>
+          <Route path="/login" element={isAuthenticated ?<Navigate to="/"/> : <Login/>}/>
           <Route path="/signup" element={<Signup/>}/>
           <Route path=""/>
        </Routes>
