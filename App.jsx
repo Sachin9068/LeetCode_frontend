@@ -14,7 +14,7 @@ function App(){
 
       useEffect(()=>{
            dispatch(checkAuth());
-      },[isAuthenticated])
+      },[dispatch])
 
   return(
     <>
