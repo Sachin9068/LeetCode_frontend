@@ -22,7 +22,7 @@ function App(){
        <Routes>
           <Route path="/" element={isAuthenticated ?<Home/> :<Navigate to="/signup"/>}/>
           <Route path="/login" element={isAuthenticated ?<Navigate to="/"/> : <Login/>}/>
-          <Route path="/signup" element={<Signup/>}/>
+          <Route path="/signup" element={isAuthenticated ?<Navigate to="/"/> : <Signup/>}/>
           <Route path=""/>
        </Routes>
    
