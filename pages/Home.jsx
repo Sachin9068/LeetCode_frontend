@@ -34,8 +34,10 @@ function Home(){
       console.error('Error fetching solved Problems : ',error);
     }  
    }
-   
-});
+
+   fetchProblem();
+   if(user) fetchSolvedProblem();
+},[user]);
 
    const handleLogout = ()=>{
     dispatch(logoutUser());
