@@ -4,17 +4,16 @@ import axiosClient from './utils/axiosClient';
 
 
 export const registerUser = createAsyncThunk(
-    'auth/register',
-    async (userData,{rejectWithValue})=>{
-        try{
-             const response = await axiosClient.post('/user/register',userData);
-             return response.data.user;
-        }
-        catch(err){
-            return rejectWithValue(err);
-        }
-
-});
+  'auth/register',
+  async (userData, { rejectWithValue }) => {
+    try {
+    const response =  await axiosClient.post('/user/register',userData);
+    return response.data.user;
+    }catch (error) {
+        return rejectWithValue(error.response?.data || error.message  )
+    }
+}
+);
 
 export const loginUser = createAsyncThunk(
     'auth/login',
@@ -23,9 +22,9 @@ export const loginUser = createAsyncThunk(
         const responce = await axiosClient.post('/user/login',Credential);
         return responce.data.user;
         }
-        catch(err){
-            return rejectWithValue(err);
-        }
+        catch (error) {
+        return rejectWithValue(error.response?.data || error.message  )
+    }
        
 });
 
@@ -36,9 +35,9 @@ export const logoutUser = createAsyncThunk(
             await axiosClient.get('/user/logout')
              return null;
         }
-        catch(err){
-            return rejectWithValue(err);
-        }
+       catch (error) {
+        return rejectWithValue(error.response?.data || error.message  )
+    }
 });
 
 export const checkAuth = createAsyncThunk(
@@ -48,9 +47,9 @@ export const checkAuth = createAsyncThunk(
               const {data} = await axiosClient.get('/user/check');
               return data.user
         }
-        catch(err){
-            return rejectWithValue(err);
-        }
+        catch (error) {
+        return rejectWithValue(error.response?.data || error.message  )
+    }
     }
 )
 
@@ -135,7 +134,7 @@ const authSlice = createSlice({
             state.error = action.payload?.message || "something went wrong";
             state.isAuthenticated = false;
             state.user = null;
-            s
+        
         })
         
     }
