@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 import axiosClient from "../utils/axiosClient";
+import { NavLink } from 'react-router'; // Fixed import
+import { useDispatch, useSelector } from 'react-redux';
+import { logoutUser } from '../authSlice';
+
 
 function Home(){
    const dispatch = useDispatch();
