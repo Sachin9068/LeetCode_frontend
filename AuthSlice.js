@@ -7,9 +7,13 @@ export const registerUser = createAsyncThunk(
   'auth/register',
   async (userData, { rejectWithValue }) => {
     try {
-    const response =  await axiosClient.post('/user/register',userData);
-    return response.data.user;
+        console.log(userData);
+       const response =  await axiosClient.post('/user/register',userData);
+    //     console.log('after api call'); 
+    //    console.log('Login API Response:', response.data); 
+       return response.data.User;
     }catch (error) {
+        console.log(" ghgf"+error);
         return rejectWithValue(error.response?.data || error.message  )
     }
 }
@@ -19,8 +23,9 @@ export const loginUser = createAsyncThunk(
     'auth/login',
     async (Credential , {rejectWithValue})=>{
         try{
+           
         const responce = await axiosClient.post('/user/login',Credential);
-        return responce.data.user;
+        return responce.data.User;
         }
         catch (error) {
         return rejectWithValue(error.response?.data || error.message  )
@@ -68,17 +73,22 @@ const authSlice = createSlice({
         .addCase(registerUser.pending,(state)=>{
             state.loading = true;
             state.error = null;
+            console.log('signup pandding...');
         })
         .addCase(registerUser.fulfilled,(state,action)=>{
             state.loading = false;
             state.isAuthenticated = !!action.payload; // true - if value exists  and false - if value is empty
             state.user = action.payload;
+             console.log('Login fulfilled - user:', action.payload); // Debug log
+                console.log('isAuthenticated set to:', !!action.payload); 
+            
         })
         .addCase(registerUser.rejected , (state,action)=>{
             state.loading = false;
             state.error = action.payload?.message || "Somthing went wrong"
             state.isAuthenticated = false;
             state.user = null;
+             console.log('Signup rejected - error:', state.error); 
         })
 
         //login User Case
@@ -86,17 +96,21 @@ const authSlice = createSlice({
         .addCase(loginUser.pending , (state)=>{
             state.loading = true;
             state.error = null;
+             console.log('Login pending...'); // Debug log
         })
         .addCase(loginUser.fulfilled,(state,action)=>{
             state.loading = false;
             state.isAuthenticated = !!action.payload;
-            state.user = action.payload
+            state.user = action.payload;
+              console.log('Login fulfilled - user:', action.payload); // Debug log
+                console.log('isAuthenticated set to:', !!action.payload); 
         })
         .addCase(loginUser.rejected,(state,action)=>{
             state.loading = false;
             state.error = action.payload?.message || "Somsthing went wrong";
             state.isAuthenticated = false;
             state.user = null;
+            console.log('Login rejected - error:', state.error); // Debug log
         })
 
         //logout User Case

@@ -1,67 +1,71 @@
-import { useEffect, useState } from "react";
-import axiosClient from "../utils/axiosClient";
+import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router'; // Fixed import
 import { useDispatch, useSelector } from 'react-redux';
+import axiosClient from '../utils/axiosClient';
 import { logoutUser } from '../authSlice';
 
+function Homepage() {
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+  const [problems, setProblems] = useState([]);
+  const [solvedProblems, setSolvedProblems] = useState([]);
+  const [filters, setFilters] = useState({
+    difficulty: 'all',
+    tag: 'all',
+    status: 'all' 
+  });
 
-function Home(){
-   const dispatch = useDispatch();
-   const {user} = useSelector((state)=>state.auth);
-   const [problem,setProblem] = useState([]);
-   const [solvedProblem,setSolvedProblem] = useState([]);
-
-   const [filter,setFilter] = useState({
-    difficulty:'all',
-    tag:'all',
-    status:'all'
-   });
-
-   useEffect(()=>{
-    const fetchProblem = async ()=>{
-      try{
-         const {data} = await axiosClient.get('/problem/AllProblem');
-         setProblem(data);
+  useEffect(() => {
+    const fetchProblems = async () => {
+      try {
+        const { data } = await axiosClient.get('/problem/AllProblem');
+        setProblems(data);
+      } catch (error) {
+        console.error('Error fetching problems:', error);
       }
-      catch(error){
-              console.error('Error Fetching Problems : ',error); 
-       }
-    }
+    };
 
+    const fetchSolvedProblems = async () => {
+      try {
+        const { data } = await axiosClient.get('/problem/ProblemSolvedByUser');
+        setSolvedProblems(data);
+      } catch (error) {
+        console.error('Error fetching solved problems:', error);
+      }
+    };
 
-   const fetchSolvedProblem = async ()=>{
-    try{
-         const {data} = await axiosClient.get('/problem/ProblemSolvedByUser');
-         setSolvedProblem(data);
-    }
-    catch(error)  {
-      console.error('Error fetching solved Problems : ',error);
-    }  
-   }
+    fetchProblems();
+    if (user) fetchSolvedProblems();
+  }, [user]);
 
-   fetchProblem();
-   if(user) fetchSolvedProblem();
-},[user]);
-
-   const handleLogout = ()=>{
+  const handleLogout = () => {
     dispatch(logoutUser());
-    setSolvedProblem([]);
-   };
+    setSolvedProblems([]); // Clear solved problems on logout
+  };
 
-   const filteredProblem = problem.filter(problem =>{
-    const difficultyMatch = filter.difficulty === 'all' || problem.difficulty === filter.difficulty;
-    const tagMatch = filter.tag === 'all' || problem.tags === filter.tag;
-    const statusMatch = filter.status === 'all' || solvedProblem.some(sp=>sp._id === problem._id);
+const filteredProblems = problems.filter(problem => {
+  if (!problem) return false;
+  
+  const difficultyMatch = filters.difficulty === 'all' || 
+                         problem.difficulty === filters.difficulty;
+  
+  const tagMatch = filters.tag === 'all' || 
+                   (problem.tags && Array.isArray(problem.tags) && 
+                    problem.tags.includes(filters.tag));
+  
+  const statusMatch = filters.status === 'all' || 
+                     (Array.isArray(solvedProblems) && 
+                      solvedProblems.some(sp => sp._id === problem._id));
+  
+  return difficultyMatch && tagMatch && statusMatch;
+});
 
-    return difficultyMatch && tagMatch && statusMatch;
-   })
-
-return (
-    <div className="min-h-screen bg-base-200">
+  return (
+    <div className="min-h-screen bg-base-200 ">
       {/* Navigation Bar */}
       <nav className="navbar bg-base-100 shadow-lg px-4">
         <div className="flex-1">
-          <NavLink to="/" className="btn btn-ghost text-xl">ForcFullyCoder</NavLink>
+          <NavLink to="/" className="btn btn-ghost text-xl">LeetCode</NavLink>
         </div>
         <div className="flex-none gap-4">
           <div className="dropdown dropdown-end">
@@ -124,7 +128,7 @@ return (
                       {problem.title}
                     </NavLink>
                   </h2>
-                  {solvedProblems.some(sp => sp._id === problem._id) && (
+                  {solvedProblems?.some?.(sp => sp._id === problem._id) &&  (
                     <div className="badge badge-success gap-2">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
@@ -151,12 +155,14 @@ return (
   );
 }
 
-const getDifficultyBadgeColor = (difficulty)=>{
-  switch (difficulty.toLowerCase()){
-      case 'easy': return 'badge-success';
+const getDifficultyBadgeColor = (difficulty) => {
+   if (!difficulty) return 'badge-neutral'; 
+  switch (difficulty.toLowerCase()) {
+    case 'easy': return 'badge-success';
     case 'medium': return 'badge-warning';
     case 'hard': return 'badge-error';
-    default: return 'badge-neutral'; 
+    default: return 'badge-neutral';
   }
-}
-export default Home
+};
+
+export default Homepage;
