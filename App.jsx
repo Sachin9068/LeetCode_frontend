@@ -6,6 +6,7 @@ import MyEditor from './pages/coder';
 import { useDispatch, useSelector } from 'react-redux';
 import { checkAuth } from "./AuthSlice";
 import { useEffect } from "react";
+import AdminPanel from './pages/Admin'
 
 
 function App(){
