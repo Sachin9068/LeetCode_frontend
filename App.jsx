@@ -2,7 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router"
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import MyEditor from './pages/coder';
+import CodingInterface from './pages/coder';
 import { useDispatch, useSelector } from 'react-redux';
 import { checkAuth } from "./AuthSlice";
 import { useEffect } from "react";
@@ -25,7 +25,7 @@ function App(){
           <Route path="/" element={isAuthenticated ?<Home/> :<Navigate to="/signup"/>}/>
           <Route path="/login" element={isAuthenticated ?<Navigate to="/"/> : <Login/>}/>
           <Route path="/signup" element={isAuthenticated ?<Navigate to="/"/> : <Signup/>}/>
-                <Route path="/admin" element={<AdminPanel/>}></Route>
+          <Route path="/admin" element={<AdminPanel/>}></Route>
       {/* <Route 
         path="/admin" 
         element={
@@ -35,7 +35,7 @@ function App(){
         } 
       /> */}
 
-          <Route path='/code' element={<MyEditor/>}></Route>
+          <Route path='/code' element={<CodingInterface/>}></Route>
        </Routes>
    
    </BrowserRouter>

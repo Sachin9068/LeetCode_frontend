@@ -43,27 +43,18 @@ function Homepage() {
     setSolvedProblems([]); // Clear solved problems on logout
   };
 
-const filteredProblems = problems.filter(problem => {
-  if (!problem) return false;
-  
-  const difficultyMatch = filters.difficulty === 'all' || 
-                         problem.difficulty === filters.difficulty;
-  
-  const tagMatch = filters.tag === 'all' || 
-                   (problem.tags && Array.isArray(problem.tags) && 
-                    problem.tags.includes(filters.tag));
-  
-  const statusMatch = filters.status === 'all' || 
-                     (Array.isArray(solvedProblems) && 
-                      solvedProblems.some(sp => sp._id === problem._id));
-  
-  return difficultyMatch && tagMatch && statusMatch;
-});
+ const filteredProblems = problems.filter(problem => {
+    const difficultyMatch = filters.difficulty === 'all' || problem.difficulty === filters.difficulty;
+    const tagMatch = filters.tag === 'all' || problem.tags === filters.tag;
+    const statusMatch = filters.status === 'all' || 
+                      solvedProblems.some(sp => sp._id === problem._id);
+    return difficultyMatch && tagMatch && statusMatch;
+  });
 
   return (
-    <div className="min-h-screen bg-base-200 ">
+    <div className="min-h-screen  bg-[#042E49]">
       {/* Navigation Bar */}
-      <nav className="navbar bg-base-100 shadow-lg px-4">
+      <nav className="navbar bg-[var(--color-info-content)] shadow-lg px-4">
         <div className="flex-1">
           <NavLink to="/" className="btn btn-ghost text-xl">LeetCode</NavLink>
         </div>
