@@ -1,19 +1,53 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Editor from '@monaco-editor/react';
+import axiosClient from '../utils/axiosClient';
+import { useParams } from 'react-router';
 
 const CodingInterface = () => {
-  const [code, setCode] = useState(`function twoSum(nums, target) {
-  // Write your solution here
-  for (let i = 0; i < nums.length; i++) {
-    for (let j = i + 1; j < nums.length; j++) {
-      if (nums[i] + nums[j] === target) {
-        return [i, j];
-      }
-    }
-  }
-  return [];
-}`);
+  const [problem,setProblem] = useState(null);
+  const [loading,setLoading] = useState(false);
+  let {problemId} = useParams();
+  const [code, setCode] = useState('');
+  const [selectedLanguage,setSelectedLanguage] = useState('cpp');
   const [activeTab, setActiveTab] = useState('description'); // 'description', 'solution', 'submission'
+
+
+useEffect(()=>{
+     const fetchProblem = async ()=>{
+           setLoading(true);         
+           try{
+                const response = await axiosClient.get(`/problem/problemById/${problemId}`);
+               console.log(response.data);
+                const initialcode = response.data?.startcode?.find((sc)=>{
+                  if(sc.language == "cpp" && selectedLanguage == 'cpp') return true;
+                  else if(sc.language == "java" && selectedLanguage == 'java') return true;
+                  else if(sc.language == "javascript" && selectedLanguage == 'javascript') return true;
+                  
+                  return false;
+                })?.initialcode || 'hello';
+
+                setProblem(response.data);
+                setCode(initialcode);
+                setLoading(false);
+
+           }   
+           catch(error){
+              console.error('Error Fetching Problem : ',error);
+              setLoading(false);
+           }
+     };
+   fetchProblem();
+
+
+},[problemId])
+
+useEffect(()=>{
+    
+
+
+
+  
+},[])
 
   const handleEditorChange = (value) => {
     setCode(value);
