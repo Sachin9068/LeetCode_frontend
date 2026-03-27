@@ -2,15 +2,18 @@ import React, { useEffect, useState } from 'react';
 import Editor from '@monaco-editor/react';
 import axiosClient from '../utils/axiosClient';
 import { useParams } from 'react-router';
+import { success } from 'zod';
 
 const CodingInterface = () => {
   const [problem,setProblem] = useState(null);
   const [loading,setLoading] = useState(false);
   let {problemId} = useParams();
   const [code, setCode] = useState('');
-  const [selectedLanguage,setSelectedLanguage] = useState('cpp');
+  const [selectedLanguage,setSelectedLanguage] = useState('');
   const [activeTab, setActiveTab] = useState('description'); // 'description', 'solution', 'submission'
-
+  const [runResult, setRunResult] = useState(null);
+  const [activeRightTab, setActiveRightTab] = useState('code');
+  const [submitResult, setSubmitResult] = useState(null);
 
 useEffect(()=>{
      const fetchProblem = async ()=>{
@@ -43,15 +46,85 @@ useEffect(()=>{
 
 useEffect(()=>{
     
+if(problem){
+  const initialcode = problem.startcode?.find(sc=>sc.language === selectedLanguage)?.initialcode || "wrong";
+  setCode(initialcode);
+}
 
-
-
-  
-},[])
+},[selectedLanguage,problem])
 
   const handleEditorChange = (value) => {
-    setCode(value);
+    setCode(value || "123");
   };
+
+    const handleLanguageChange = (language) => {
+    setSelectedLanguage(language);
+  };
+
+  const handleRun = async ()=>{
+    setLoading(true);
+    setRunResult(null);
+
+    try{
+       const response = await axiosClient.post(`/submission/run/${problemId}`,{
+       code,
+       language:selectedLanguage
+       });
+
+       setRunResult(response.data);
+       setLoading(false);
+       setActiveRightTab('tesecase');
+      
+    }
+    catch(error){
+        console.error('Error running code:', error);
+        setRunResult({
+          success:false,
+          error:'Internal server error'
+        });
+        setLoading(false);
+        setActiveRightTab('testcase');  
+    }
+
+  }
+
+  const handleSubmitCode = async ()=>{
+    setLoading(true);
+    setSubmitResult(null);
+    try{
+        const response = await axiosClient.post(`/submission/submit/${problemId}`,{
+          code:code,
+          language:selectedLanguage
+        });
+
+        setSubmitResult(response.data);
+        setLoading(false);
+        setActiveRightTab(result);
+    }
+    catch(error){
+       console.error('Error Submitting code : ',error);
+       setSubmitResult(null);
+       setLoading(false);
+       setActiveRightTab('result');
+    }
+    
+  };
+
+  const getDifficultyColor = (difficulty) => {
+    switch (difficulty) {
+      case 'easy': return 'text-green-500';
+      case 'medium': return 'text-yellow-500';
+      case 'hard': return 'text-red-500';
+      default: return 'text-gray-500';
+    }
+  };
+
+   if (loading && !problem) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    )};
 
   return (
     <div className="flex flex-col h-screen bg-white text-black">
@@ -103,7 +176,7 @@ useEffect(()=>{
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1">
             <li>
-              <a>Run</a>
+              <a onClick={handleRun}>Run</a>
             </li>
             <li>
               <a>Submit</a>
@@ -151,45 +224,40 @@ useEffect(()=>{
             {/* Description Tab Content */}
             {activeTab === 'description' && (
               <>
-                <h1 className="text-2xl font-bold mb-4">Problem Title: Two Sum</h1>
+                <h1 className="text-2xl font-bold mb-4">Problem Title: {problem?.title}</h1>
+                 <div className={`badge badge-outline ${getDifficultyColor(problem?.dificultylevel)}`}>
+                      {problem?.dificultylevel?.charAt(0).toUpperCase() + problem?.dificultylevel?.slice(1)}
+                  </div>
+
+                 <div className={`ml-1 badge badge-outline ${getDifficultyColor(problem?.tag)}`}>
+                      {problem?.tag?.charAt(0).toUpperCase()+ problem?.tag?.slice(1)}
+                  </div>
 
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold mb-2">Problem Description</h2>
-                  <p className="text-gray-800">
-                    Given an array of integers <code className="bg-gray-100 px-1 rounded">nums</code> and an integer{' '}
-                    <code className="bg-gray-100 px-1 rounded">target</code>, return the indices of the two numbers that add
-                    up to <code className="bg-gray-100 px-1 rounded">target</code>.
-                  </p>
-                  <p className="mt-2 text-gray-800">
-                    You may assume that each input would have <strong>exactly one solution</strong>, and you may not use the
-                    same element twice. You can return the answer in any order.
-                  </p>
+                 
+                  <p className="mt-2 text-gray-800">{problem?.description}</p>
                 </div>
 
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold mb-2">Problem Example</h2>
-                  <div className="bg-gray-50 p-3 rounded-md mb-3">
-                    <p className="font-medium">Example 1:</p>
-                    <pre className="text-sm mt-1 whitespace-pre-wrap">
-                      Input: nums = [2,7,11,15], target = 9 Output: [0,1] Explanation: Because nums[0] + nums[1] == 9, we
-                      return [0, 1].
-                    </pre>
+                   
+                   {problem?.visibletestcase?.map((example,index)=>(
+                      <div className="bg-gray-50 p-3 rounded-md mb-3">
+                        <p className="font-medium">Example {index+1} :</p>
+                        <pre className="text-sm mt-1 whitespace-pre-wrap">
+                          <strong>Input:</strong> {example?.input}, 
+                          <strong>Output:</strong> {example?.output},
+                          <strong>Explantion:</strong> {example?.explantion}
+                      </pre>
                   </div>
-                  <div className="bg-gray-50 p-3 rounded-md mb-3">
-                    <p className="font-medium">Example 2:</p>
-                    <pre className="text-sm mt-1 whitespace-pre-wrap">
-                      Input: nums = [3,2,4], target = 6 Output: [1,2]
-                    </pre>
-                  </div>
-                  <div className="bg-gray-50 p-3 rounded-md">
-                    <p className="font-medium">Example 3:</p>
-                    <pre className="text-sm mt-1 whitespace-pre-wrap">
-                      Input: nums = [3,3], target = 6 Output: [0,1]
-                    </pre>
-                  </div>
+                   ))}
+
+                  
+                  
                 </div>
 
-                <div>
+                {/* <div>
                   <h2 className="text-xl font-semibold mb-2">Constraints</h2>
                   <ul className="list-disc list-inside text-gray-800 space-y-1">
                     <li>2 &lt;= nums.length &lt;= 10⁴</li>
@@ -197,7 +265,7 @@ useEffect(()=>{
                     <li>-10⁹ &lt;= target &lt;= 10⁹</li>
                     <li>Only one valid answer exists.</li>
                   </ul>
-                </div>
+                </div> */}
               </>
             )}
 
@@ -205,47 +273,24 @@ useEffect(()=>{
             {activeTab === 'solution' && (
               <div>
                 <h2 className="text-2xl font-bold mb-4">Solution Approach</h2>
-                <div className="mb-4">
-                  <h3 className="text-lg font-semibold">Intuition</h3>
-                  <p>
-                    The brute force approach would be to check every pair of numbers, which takes O(n²) time. 
-                    We can do better by using a hash map to store numbers we've seen so far. For each number, 
-                    we compute the complement (target - current number). If the complement exists in our map, 
-                    we have found the solution.
-                  </p>
-                </div>
-                <div className="mb-4">
-                  <h3 className="text-lg font-semibold">Algorithm</h3>
-                  <ol className="list-decimal list-inside space-y-1">
-                    <li>Initialize an empty Map.</li>
-                    <li>Iterate through the array with index i.</li>
-                    <li>Calculate complement = target - nums[i].</li>
-                    <li>If the complement is already in the map, return [map.get(complement), i].</li>
-                    <li>Otherwise, store the current number and its index in the map: map.set(nums[i], i).</li>
-                    <li>If no solution is found (though the problem guarantees one), return an empty array.</li>
-                  </ol>
-                </div>
-                <div className="mb-4">
-                  <h3 className="text-lg font-semibold">Complexity</h3>
-                  <ul className="list-disc list-inside">
-                    <li><strong>Time Complexity:</strong> O(n) – we traverse the list once, and map operations are O(1).</li>
-                    <li><strong>Space Complexity:</strong> O(n) – the map stores at most n elements.</li>
-                  </ul>
-                </div>
+               
                 <div className="mt-4">
-                  <h3 className="text-lg font-semibold">Code (JavaScript)</h3>
+                  <h3 className="text-lg font-semibold">{code}</h3>
                   <pre className="bg-gray-100 p-3 rounded-md text-sm overflow-x-auto">
-                    {`function twoSum(nums, target) {
-  const map = new Map();
-  for (let i = 0; i < nums.length; i++) {
-    const complement = target - nums[i];
-    if (map.has(complement)) {
-      return [map.get(complement), i];
-    }
-    map.set(nums[i], i);
-  }
-  return [];
-}`}
+                    {problem?.referenceSolution?.map((solution,index)=>{
+                      <>
+                         <div className="bg-base-200 px-4 py-2 rounded-t-lg">
+                          <h3 className="font-semibold">{problem?.title} - {solution?.language}</h3>
+                        </div>
+                         <div className="p-4">
+                          <pre className="bg-base-300 p-4 rounded text-sm overflow-x-auto">
+                            <code>{solution?.completecode}</code>
+                          </pre>
+                        </div>
+
+                      </>
+                        
+                    }) || <p className="text-gray-500">Solutions will be available after you solve the problem.</p>}
                   </pre>
                 </div>
               </div>
@@ -310,7 +355,16 @@ useEffect(()=>{
         {/* RIGHT SIDE: Monaco Code Editor with bottom empty space */}
         <div className="flex-1 flex flex-col bg-white overflow-hidden pb-6">
           <div className="px-4 py-2 border-b border-gray-200 bg-gray-50">
-            <span className="font-medium text-gray-700">Solution (JavaScript)</span>
+     <select 
+  className="select select-bordered select-sm w-full max-w-xs"
+  value={selectedLanguage}
+  onClick={(e) => handleLanguageChange(e.target.value)}
+>
+  <option value="javascript">JavaScript</option>
+  <option value="cpp">C++</option>
+  <option value="python">Python</option>
+  <option value="java">Java</option>
+</select>
           </div>
           <div className="flex-1 overflow-hidden">
             <Editor
