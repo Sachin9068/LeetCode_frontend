@@ -14,13 +14,13 @@ const CodingInterface = () => {
   const [runResult, setRunResult] = useState(null);
   const [activeRightTab, setActiveRightTab] = useState('code');
   const [submitResult, setSubmitResult] = useState(null);
+  const [submitCode,setSubmitCode] = useState([]);
 
 useEffect(()=>{
      const fetchProblem = async ()=>{
            setLoading(true);         
            try{
                 const response = await axiosClient.get(`/problem/problemById/${problemId}`);
-               console.log(response.data);
                 const initialcode = response.data?.startcode?.find((sc)=>{
                   if(sc.language == "cpp" && selectedLanguage == 'cpp') return true;
                   else if(sc.language == "java" && selectedLanguage == 'java') return true;
@@ -52,6 +52,34 @@ if(problem){
 }
 
 },[selectedLanguage,problem])
+
+
+useEffect(()=>{
+
+
+  const FetchSubmitCode = async ()=>{
+    
+    if (activeTab !== 'submission') return;
+    setLoading(true);
+    try{
+      
+          const response = await axiosClient.get(`/submission/submit/${problemId}`);
+          console.log(response?.data);
+          setSubmitCode(response?.data);
+          setLoading(false);
+          
+    }
+    catch(error){
+      console.error("FetchSubmitCode Error : ",error);
+      setLoading(false);
+    }
+  };
+
+  FetchSubmitCode();
+
+},[problemId,activeTab]);
+
+
 
   const handleEditorChange = (value) => {
     setCode(value || "123");
@@ -87,6 +115,8 @@ if(problem){
     }
 
   }
+
+  
 
   const handleSubmitCode = async ()=>{
     setLoading(true);
@@ -303,45 +333,34 @@ if(problem){
                 <p className="text-gray-500 mb-4">Your previous submissions for this problem:</p>
                 <div className="overflow-x-auto">
                   <table className="table table-zebra w-full">
-                    <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="text-left py-2">Status</th>
-                        <th className="text-left py-2">Runtime</th>
-                        <th className="text-left py-2">Memory</th>
-                        <th className="text-left py-2">Language</th>
-                        <th className="text-left py-2">Submitted</th>
-                      </tr>
-                    </thead>
+                 
+
+                     <thead>
+                          <tr className="border-b border-gray-200">
+                          <th className="text-left py-2">Status</th>
+                          <th className="text-left py-2">Runtime</th>
+                          <th className="text-left py-2">Memory</th>
+                          <th className="text-left py-2">Language</th>
+                          <th className="text-left py-2">Submitted</th>
+                          </tr>
+                      </thead>
+               {submitCode.map((sub)=>(
                     <tbody>
                       <tr className="border-b border-gray-100">
-                        <td className="py-2"><span className="badge badge-success">Accepted</span></td>
-                        <td>68 ms</td>
-                        <td>42.1 MB</td>
-                        <td>JavaScript</td>
-                        <td>Just now</td>
+                        <td className="py-2"><span className="badge badge-success">{sub?.status}</span></td>
+                        <td>{sub?.runtime}</td>
+                        <td>{sub?.memory}</td>
+                        <td>{sub?.language}</td>
+                        <td>{sub?.updatedAt}</td>
                       </tr>
-                      <tr className="border-b border-gray-100">
-                        <td className="py-2"><span className="badge badge-error">Wrong Answer</span></td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>JavaScript</td>
-                        <td>5 minutes ago</td>
-                      </tr>
-                      <tr className="border-b border-gray-100">
-                        <td className="py-2"><span className="badge badge-success">Accepted</span></td>
-                        <td>72 ms</td>
-                        <td>41.9 MB</td>
-                        <td>JavaScript</td>
-                        <td>1 hour ago</td>
-                      </tr>
-                      <tr>
-                        <td className="py-2"><span className="badge badge-warning">Time Limit Exceeded</span></td>
-                        <td>N/A</td>
-                        <td>N/A</td>
-                        <td>JavaScript</td>
-                        <td>Yesterday</td>
-                      </tr>
+
                     </tbody>
+
+                  ))
+                   
+                  }
+                   
+
                   </table>
                 </div>
                 <div className="mt-6 text-sm text-gray-500">
