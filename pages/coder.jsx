@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import axiosClient from '../utils/axiosClient';
 import { useParams } from 'react-router';
@@ -15,6 +15,8 @@ const CodingInterface = () => {
   const [activeRightTab, setActiveRightTab] = useState('code');
   const [submitResult, setSubmitResult] = useState(null);
   const [submitCode,setSubmitCode] = useState([]);
+  const editorRef = useRef(null);
+  const [exicution, setExicution] = useState(0);
 
 useEffect(()=>{
      const fetchProblem = async ()=>{
@@ -85,11 +87,16 @@ useEffect(()=>{
     setCode(value || "123");
   };
 
+  const handleEditorDidMount = (editor)=>{
+    editorRef.current = editor;
+  }
+
     const handleLanguageChange = (language) => {
     setSelectedLanguage(language);
   };
 
   const handleRun = async ()=>{
+    setExicution(1); 
     setLoading(true);
     setRunResult(null);
 
@@ -101,7 +108,7 @@ useEffect(()=>{
 
        setRunResult(response.data);
        setLoading(false);
-       setActiveRightTab('tesecase');
+       setActiveRightTab('run');
       
     }
     catch(error){
@@ -111,7 +118,7 @@ useEffect(()=>{
           error:'Internal server error'
         });
         setLoading(false);
-        setActiveRightTab('testcase');  
+        setActiveRightTab('run');  
     }
 
   }
@@ -119,6 +126,7 @@ useEffect(()=>{
   
 
   const handleSubmitCode = async ()=>{
+     setExicution(1);
     setLoading(true);
     setSubmitResult(null);
     try{
@@ -156,100 +164,16 @@ useEffect(()=>{
       </div>
     )};
 
-  return (
-    <div className="flex flex-col h-screen bg-white text-black">
-      {/* Navbar – fixed height */}
-      <div className="navbar bg-base-100 shadow-sm">
-        <div className="navbar-start">
-          <div className="dropdown">
-            <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h8m-8 6h16"
-                />
-              </svg>
-            </div>
-            <ul
-              tabIndex={-1}
-              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
-            >
-              <li>
-                <a>Item 1</a>
-              </li>
-              <li>
-                <a>Parent</a>
-                <ul className="p-2">
-                  <li>
-                    <a>Submenu 1</a>
-                  </li>
-                  <li>
-                    <a>Submenu 2</a>
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <a>Item 3</a>
-              </li>
-            </ul>
-          </div>
-          <a className="btn btn-ghost text-xl">ForceFullyCoder</a>
-        </div>
-        <div className="navbar-center hidden lg:flex">
-          <ul className="menu menu-horizontal px-1">
-            <li>
-              <a onClick={handleRun}>Run</a>
-            </li>
-            <li>
-              <a>Submit</a>
-            </li>
-            <li>
-              <a>Ai Help</a>
-            </li>
-          </ul>
-        </div>
-        <div className="navbar-end">
-          <a className="btn">Button</a>
-        </div>
-      </div>
+    function RunSubmitbtn(){
+          return (
+            
+          )
+    }
 
-      {/* Main content – takes remaining height */}
-      <div className="flex-1 flex flex-row overflow-hidden">
-        {/* LEFT SIDE: Tabbed Content (Description / Solution / Submission) */}
-        <div className="flex-1 overflow-auto border-r border-gray-200">
-          {/* Sticky Tab Buttons */}
-          <div className="sticky top-0 z-10 bg-white px-6 pt-6 pb-2 border-b border-gray-200">
-            <div className="flex gap-2">
-              <button
-                className={`btn btn-sm ${activeTab === 'description' ? 'btn-primary' : 'btn-ghost'}`}
-                onClick={() => setActiveTab('description')}
-              >
-                Description
-              </button>
-              <button
-                className={`btn btn-sm ${activeTab === 'solution' ? 'btn-primary' : 'btn-ghost'}`}
-                onClick={() => setActiveTab('solution')}
-              >
-                Solution
-              </button>
-              <button
-                className={`btn btn-sm ${activeTab === 'submission' ? 'btn-primary' : 'btn-ghost'}`}
-                onClick={() => setActiveTab('submission')}
-              >
-                Submission
-              </button>
-            </div>
-          </div>
-
-          {/* Scrollable Content Area */}
+    function ProblemShowcasebtn(){
+        return (
+          <>
+             {/* Scrollable Content Area */}
           <div className="px-6 py-6">
             {/* Description Tab Content */}
             {activeTab === 'description' && (
@@ -368,31 +292,154 @@ useEffect(()=>{
                 </div>
               </div>
             )}
+
+
           </div>
+          </>
+          )
+    }
+
+  return (
+    <div className="flex flex-col h-screen bg-white text-black">
+      {/* Navbar – fixed height */}
+      <div className="navbar bg-base-100 shadow-sm">
+        <div className="navbar-start">
+          <div className="dropdown">
+            <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h8m-8 6h16"
+                />
+              </svg>
+            </div>
+            <ul
+              tabIndex={-1}
+              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+            >
+              <li>
+                <a>Item 1</a>
+              </li>
+              <li>
+                <a>Parent</a>
+                <ul className="p-2">
+                  <li>
+                    <a>Submenu 1</a>
+                  </li>
+                  <li>
+                    <a>Submenu 2</a>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <a>Item 3</a>
+              </li>
+            </ul>
+          </div>
+          <a className="btn btn-ghost text-xl">ForceFullyCoder</a>
         </div>
+        <div className="navbar-center lg:flex">
+              <button
+                className={`btn btn-sm ${activeRightTab === 'run' ? 'btn-primary' : 'btn-ghost'}`}
+                onClick={handleRun}
+              >
+                Run
+              </button>
+
+              <button
+                className={`btn btn-sm ${activeRightTab === 'submit' ? 'btn-primary' : 'btn-ghost'}`}
+                onClick={handleSubmitCode}>Submit
+              </button>
+
+              <button
+                className={`btn btn-sm ${activeRightTab === 'ai help' ? 'btn-primary' : 'btn-ghost'}`}
+                onClick={() => setExicution(1)}   
+               >Ai Help
+              </button>
+        </div>
+        <div className="navbar-end">
+          <a className="btn">Button</a>
+        </div>
+      </div>
+
+      {/* Main content – takes remaining height */}
+      <div className="flex-1 flex flex-row overflow-hidden">
+        {/* LEFT SIDE: Tabbed Content (Description / Solution / Submission) */}
+      <div className="flex-1 overflow-auto border-r border-gray-200">
+          {/* Sticky Tab Buttons */}
+          <div className="sticky top-0 z-10 bg-white px-6 pt-6 pb-2 border-b border-gray-200">
+            <div className="flex gap-2">
+              <button
+                className={`btn btn-sm ${activeTab === 'description' ? 'btn-primary' : 'btn-ghost'}`}
+               onClick={() => {
+                   setActiveTab('description');
+                   setExicution(0);
+                }}
+              >
+                Description
+              </button>
+              <button
+                className={`btn btn-sm ${activeTab === 'solution' ? 'btn-primary' : 'btn-ghost'}`}
+               onClick={() => {
+                    setActiveTab('solution');
+                    setExicution(0);
+                  }}
+              >
+                Solution
+              </button>
+              <button
+                className={`btn btn-sm ${activeTab === 'submission' ? 'btn-primary' : 'btn-ghost'}`}
+                onClick={() => {
+                    setActiveTab('submission');
+                    setExicution(0);
+                  }}
+              >
+                Submission
+              </button>
+            </div>
+          </div>
+
+       {exicution ? RunSubmitbtn() : ProblemShowcasebtn() };
+        
+
+         
+         
+
+          </div>
+       
+       
 
         {/* RIGHT SIDE: Monaco Code Editor with bottom empty space */}
         <div className="flex-1 flex flex-col bg-white overflow-hidden pb-6">
           <div className="px-4 py-2 border-b border-gray-200 bg-gray-50">
-     <select 
-  className="select select-bordered select-sm w-full max-w-xs"
-  value={selectedLanguage}
-  onClick={(e) => handleLanguageChange(e.target.value)}
->
-  <option value="javascript">JavaScript</option>
-  <option value="cpp">C++</option>
-  <option value="python">Python</option>
-  <option value="java">Java</option>
-</select>
+             <select 
+             className="select select-bordered select-sm w-full max-w-xs"
+              value={selectedLanguage}
+              onClick={(e) => handleLanguageChange(e.target.value)}
+              >
+             <option value="javascript">JavaScript</option>
+             <option value="cpp">C++</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+       </select>
           </div>
           <div className="flex-1 overflow-hidden">
             <Editor
               height="100%"
               width="100%"
-              language="javascript"
+              language={selectedLanguage}
               theme="vs-light"
               value={code}
               onChange={handleEditorChange}
+              onMount={handleEditorDidMount}
               options={{
                 minimap: { enabled: false },
                 scrollBeyondLastLine: false,
@@ -414,6 +461,9 @@ useEffect(()=>{
               }}
             />
           </div>
+
+          
+
         </div>
       </div>
     </div>
