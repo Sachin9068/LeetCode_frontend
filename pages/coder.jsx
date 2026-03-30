@@ -166,7 +166,13 @@ useEffect(()=>{
 
     function RunSubmitbtn(){
           return (
-            
+            <div className="px-6 py-6">
+                {activeRightTab === 'run' && (<h1>{runResult}</h1>)}
+
+                {activeRightTab === 'submit' && (<h1>hello submit</h1>)}
+
+                {activeRightTab === 'ai help' && (<h1>hello ai</h1>)}
+            </div>
           )
     }
 
